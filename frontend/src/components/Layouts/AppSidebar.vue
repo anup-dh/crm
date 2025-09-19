@@ -70,9 +70,8 @@
           </nav>
         </Section>
       </div>
-    </div>    
+    </div>
     <div class="m-2 flex flex-col gap-1">
-<!--
       <div class="flex flex-col gap-2 mb-1">
         <SignupBanner
           v-if="isDemoSite"
@@ -84,7 +83,7 @@
           :isSidebarCollapsed="isSidebarCollapsed"
           :afterUpgrade="() => capture('upgrade_plan_from_trial_banner')"
         />
-    <GettingStartedBanner
+        <GettingStartedBanner
           v-if="!isOnboardingStepsCompleted"
           :isSidebarCollapsed="isSidebarCollapsed"
         />
@@ -104,7 +103,6 @@
           <HelpIcon class="h-4 w-4" />
         </template>
       </SidebarLink>
--->
       <SidebarLink
         :label="isSidebarCollapsed ? __('Expand') : __('Collapse')"
         :isCollapsed="isSidebarCollapsed"
@@ -123,7 +121,6 @@
     </div>
     <Notifications />
     <Settings />
-<!--
     <HelpModal
       v-if="showHelpModal"
       v-model="showHelpModal"
@@ -139,7 +136,6 @@
       v-model="showIntermediateModal"
       :currentStep="currentStep"
     />
--->
   </div>
 </template>
 
@@ -315,7 +311,6 @@ function getIcon(routeName, icon) {
 const { user } = sessionStore()
 const { users, isManager } = usersStore()
 const { isOnboardingStepsCompleted, setUp } = useOnboarding('frappecrm')
-//const { isOnboardingStepsCompleted } = ref(true)
 
 async function getFirstLead() {
   let firstLead = localStorage.getItem('firstLead' + user)
@@ -523,7 +518,6 @@ onMounted(async () => {
 })
 
 // help center
-/*
 const articles = ref([
   {
     title: __('Introduction'),
@@ -612,5 +606,4 @@ const articles = ref([
     ],
   },
 ])
-*/
 </script>
