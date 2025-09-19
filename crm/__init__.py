@@ -1,4 +1,2 @@
-
-__version__ = "1.52.2"
-__title__ = "eNirman CRM"
-
+__version__ = "1.52.11"
+__title__ = "Frappe CRM"
