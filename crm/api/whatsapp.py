@@ -36,7 +36,7 @@ def on_update(doc, method):
 def notify_agent(doc):
 	if doc.type == "Incoming":
 		doctype = doc.reference_doctype
-		if doctype.startswith("CRM "):
+		if doctype and doctype.startswith("CRM "):
 			doctype = doctype[4:].lower()
 		notification_text = f"""
             <div class="mb-2 leading-5 text-ink-gray-5">
