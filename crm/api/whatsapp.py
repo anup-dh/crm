@@ -11,7 +11,7 @@ def validate(doc, method):
 	if doc.type == "Incoming" and doc.get("from"):
 		name, doctype = get_lead_or_deal_from_number(doc.get("from"))
 		if name != None:
-			doc.reference_doctype = doctype 
+			doc.reference_doctype = doctype
 			doc.reference_name = name
 
 	if doc.type == "Outgoing" and doc.get("to"):
