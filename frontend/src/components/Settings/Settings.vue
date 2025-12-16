@@ -78,7 +78,7 @@ import { Dialog, Avatar } from 'frappe-ui'
 import { ref, markRaw, computed, watch, h } from 'vue'
 import AssignmentRulePage from './AssignmentRules/AssignmentRulePage.vue'
 
-const { isManager, isTelephonyAgent, getUser } = usersStore()
+const { isAdmin, isManager, isTelephonyAgent, getUser } = usersStore()
 
 const user = computed(() => getUser() || {})
 
@@ -119,7 +119,7 @@ const tabs = computed(() => {
           component: markRaw(BrandSettings),
         },
       ],
-      condition: () => isManager(),
+      condition: () => isAdmin(),
     },
     {
       label: __('User Management'),
@@ -204,7 +204,7 @@ const tabs = computed(() => {
           condition: () => isManager(),
         },
       ],
-      condition: () => isManager() || isTelephonyAgent(),
+      condition: () => isAdmin() || isTelephonyAgent(),
     },
   ]
 
