@@ -3,15 +3,15 @@
     <template #body-title>
       <div class="flex items-center gap-3">
         <h3 class="text-2xl font-semibold leading-6 text-ink-gray-9">
-          {{ editMode ? __('Edit Task') : __('Create Task') }}
+          {{ editMode ? __('Edit task') : __('Create task') }}
         </h3>
         <Button
           v-if="task?.reference_docname"
           size="sm"
           :label="
             task.reference_doctype == 'CRM Deal'
-              ? __('Open Deal')
-              : __('Open Lead')
+              ? __('Open deal')
+              : __('Open lead')
           "
           :iconRight="ArrowUpRightIcon"
           @click="redirect()"
@@ -83,7 +83,7 @@
               class="datepicker"
               v-model="_task.due_date"
               :placeholder="__('01/04/2024 11:30 PM')"
-              :formatter="(date) => getFormat(date, '', true, true)"
+              :format="getFormat('', '', true, true, false)"
               input-class="border-none"
             />
           </div>
