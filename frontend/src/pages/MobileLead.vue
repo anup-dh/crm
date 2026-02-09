@@ -206,13 +206,9 @@ import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
 import { getMeta } from '@/stores/meta'
 import { useDocument } from '@/data/document'
-import {
-  whatsappEnabled,
-  callEnabled,
-  isMobileView,
-} from '@/composables/settings'
-import { capture } from '@/telemetry'
+import { whatsappEnabled, isMobileView } from '@/composables/settings'
 import { useActiveTabManager } from '@/composables/useActiveTabManager'
+import { useTelemetry } from 'frappe-ui/frappe'
 import {
   createResource,
   Dropdown,
@@ -225,15 +221,15 @@ import {
 } from 'frappe-ui'
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useTelemetry } from 'frappe-ui/frappe'
 
 const { brand } = getSettings()
 const { $dialog, $socket } = globalStore()
 const { statusOptions, getLeadStatus } = statusesStore()
 const { doctypeMeta } = getMeta('CRM Lead')
+const { capture } = useTelemetry()
+
 const route = useRoute()
 const router = useRouter()
-const $telemetry = useTelemetry()
 
 const props = defineProps({
   leadId: {
@@ -257,8 +253,8 @@ watch(error, (err) => {
   if (err) {
     errorTitle.value = __(
       err.exc_type == 'DoesNotExistError'
-        ? 'Document not found'
-        : 'Error occurred',
+        ? __('Document not found')
+        : __('Error occurred'),
     )
     errorMessage.value = __(err.messages?.[0] || 'An error occurred')
   } else {
@@ -462,7 +458,6 @@ async function convertToDeal() {
     existingContact.value = ''
     existingOrganization.value = ''
     capture('convert_lead_to_deal')
-    $telemetry.capture('convert_lead_to_deal', true)
     router.push({ name: 'Deal', params: { dealId: deal } })
   }
 }
