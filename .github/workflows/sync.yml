@@ -1,0 +1,29 @@
+name: Sync Fork with Frappe Upstream
+
+on:
+  workflow_dispatch: 
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v3
+        with:
+          ref: master # Your CRM branch
+          fetch-depth: 0 
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Sync with Upstream
+        run: |
+          git remote add upstream https://github.com/frappe/crm.git
+          git fetch upstream
+          git merge upstream/main # Merging Frappe's main into your master
+          git push origin master
