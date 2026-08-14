@@ -1,0 +1,52 @@
+name: Sync Fork with Frappe Upstream
+
+on:
+  workflow_dispatch: 
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Sync with Upstream
+        run: |
+          git remote add upstream https://github.com/frappe/crm.git
+          git fetch upstream
+          
+          # 1. Attempt the merge. '|| true' stops the Action from instantly failing if a conflict hits.
+          git merge upstream/main --no-edit || true
+          
+          # 2. Check if crm/__init__.py is specifically stuck in a conflict
+          if git ls-files --unmerged | grep -q "crm/__init__.py"; then
+            echo "Resolving __init__.py conflict..."
+            # Accept Frappe's file to get their newest version number
+            git checkout --theirs crm/__init__.py
+          fi
+          
+          # 3. Force your custom Enirmanification title, whether there was a conflict or not
+          sed -i 's/__title__ = .*/__title__ = "eNirman CRM"/' crm/__init__.py
+          git add crm/__init__.py
+          
+          # 4. Safety Check: If ANY other files are still conflicted (like Vue or JSON files), STOP.
+          if git ls-files --unmerged | grep -q .; then
+            echo "🚨 Other files have conflicts! Stopping so you can fix them manually."
+            exit 1
+          fi
+          
+          # 5. Commit the resolved files (if any) and push to the correct branch
+          git commit -m "Auto-synced with Frappe and enforced eNirman title" || echo "Code is already up to date"
+          git push origin main
