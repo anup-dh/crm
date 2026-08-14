@@ -1,22 +1,22 @@
 import { validateEmail } from '../../utils'
 
-const LogoGmail = '/images/gmail.png'
-const LogoOutlook = '/images/outlook.png'
-const LogoSendgrid = '/images/sendgrid.png'
-const LogoSparkpost = '/images/sparkpost.webp'
-const LogoYahoo = '/images/yahoo.png'
-const LogoYandex = '/images/yandex.png'
-const LogoFrappeMail = '/images/frappe-mail.svg'
+import LogoGmail from '../../../public/images/gmail.png'
+import LogoOutlook from '../../../public/images/outlook.png'
+import LogoSendgrid from '../../../public/images/sendgrid.png'
+import LogoSparkpost from '../../../public/images/sparkpost.webp'
+import LogoYahoo from '../../../public/images/yahoo.png'
+import LogoYandex from '../../../public/images/yandex.png'
+import LogoFrappeMail from '../../../public/images/frappe-mail.svg'
 
 const fixedFields = [
   {
-    label: __('Account name'),
+    label: __('Account Name'),
     name: 'email_account_name',
     type: 'text',
     placeholder: __('Support / Sales'),
   },
   {
-    label: 'Email ID',
+    label: __('Email ID'),
     name: 'email_id',
     type: 'email',
     placeholder: 'johndoe@example.com',
@@ -25,15 +25,13 @@ const fixedFields = [
 
 export const incomingOutgoingFields = [
   {
-    label: __('Enable incoming'),
+    label: __('Enable Incoming'),
     name: 'enable_incoming',
     type: 'checkbox',
-    description: __(
-      'If enabled, emails will be pulled from this account.',
-    ),
+    description: __('If enabled, emails will be pulled from this account.'),
   },
   {
-    label: __('Enable outgoing'),
+    label: __('Enable Outgoing'),
     name: 'enable_outgoing',
     type: 'checkbox',
     description: __(
@@ -41,7 +39,7 @@ export const incomingOutgoingFields = [
     ),
   },
   {
-    label: __('Default incoming'),
+    label: __('Default Incoming'),
     name: 'default_incoming',
     type: 'checkbox',
     description: __(
@@ -49,12 +47,21 @@ export const incomingOutgoingFields = [
     ),
   },
   {
-    label: __('Default outgoing'),
+    label: __('Default Outgoing'),
     name: 'default_outgoing',
     type: 'checkbox',
     description: __(
       'If enabled, all outgoing emails will be sent from this account. Note: Only one account can be default outgoing.',
     ),
+  },
+  {
+    label: __('Create Lead from Incoming Emails'),
+    name: 'create_lead_from_incoming_email',
+    type: 'checkbox',
+    description: __(
+      'If enabled, a lead will be automatically created when an incoming email is received from an unknown contact.',
+    ),
+    condition: (state) => state.enable_incoming,
   },
 ]
 
@@ -71,19 +78,19 @@ export const popularProviderFields = [
 export const customProviderFields = [
   ...fixedFields,
   {
-    label: __('Frappe mail site'),
+    label: __('Frappe Mail Site'),
     name: 'frappe_mail_site',
     type: 'text',
     placeholder: 'https://frappemail.com',
   },
   {
-    label: __('API key'),
+    label: __('API Key'),
     name: 'api_key',
     type: 'text',
     placeholder: '********',
   },
   {
-    label: __('API secret'),
+    label: __('API Secret'),
     name: 'api_secret',
     type: 'password',
     placeholder: '********',
@@ -149,7 +156,7 @@ export const services = [
     name: 'Frappe Mail',
     icon: LogoFrappeMail,
     info: __(
-      'Setting up Frappe Mail requires you to have an API key and API Secret of your email account. Read more',
+      'Setting up Frappe Mail requires you to have an API key and API secret for your email account. Read more',
     ),
     link: 'https://github.com/frappe/mail',
     custom: true,

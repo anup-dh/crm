@@ -41,8 +41,8 @@
             :options="taskStatusOptions(modalRef.updateTaskStatus, task)"
           >
             <Button
-              :tooltip="__('Change status')"
-              variant="ghosted"
+              :tooltip="__('Change Status')"
+              variant="ghost"
               class="hover:bg-surface-gray-4"
               @click.stop.prevent
             >
@@ -56,7 +56,7 @@
                 icon: 'trash-2',
                 onClick: () => {
                   $dialog({
-                    title: __('Delete task'),
+                    title: __('Delete Task'),
                     message: __('Are you sure you want to delete this task?'),
                     actions: [
                       {
@@ -75,8 +75,8 @@
             ]"
           >
             <Button
-              icon="more-horizontal"
-              variant="ghosted"
+              icon="lucide-more-horizontal"
+              variant="ghost"
               class="hover:bg-surface-gray-4 text-ink-gray-9"
               @click.stop.prevent
             />
@@ -85,7 +85,7 @@
       </div>
       <div
         v-if="i < tasks.length - 1"
-        class="mx-2 h-px border-t border-outline-gray-modals"
+        class="mx-2 h-px border-t border-outline-elevation-2"
       />
     </div>
   </div>
@@ -101,9 +101,9 @@ import { usersStore } from '@/stores/users'
 import { globalStore } from '@/stores/global'
 import { Tooltip, Dropdown } from 'frappe-ui'
 
-const props = defineProps({
-  tasks: Array,
-  modalRef: Object,
+defineProps({
+  tasks: { type: Array, default: () => [] },
+  modalRef: { type: Object, default: () => ({}) },
 })
 
 const { getUser } = usersStore()

@@ -24,7 +24,7 @@
         <div class="flex gap-2">
           <Button
             :tooltip="__('Refresh')"
-            :icon="RefreshIcon"
+            icon="lucide-refresh-ccw"
             :loading="isLoading"
             @click="reload()"
           />
@@ -32,8 +32,8 @@
             v-if="route.params.viewType !== 'kanban'"
             v-model="list"
             :doctype="doctype"
-            @update="updateSort"
             :hideLabel="isMobileView"
+            @update="updateSort"
           />
           <KanbanSettings
             v-if="route.params.viewType === 'kanban'"
@@ -55,7 +55,7 @@
         class="flex flex-row-reverse items-center gap-2 border-r pr-2"
       >
         <Button :label="__('Cancel')" @click="cancelChanges" />
-        <Button :label="__('Save changes')" @click="saveView" />
+        <Button :label="__('Save Changes')" @click="saveView" />
       </div>
     </div>
   </div>
@@ -83,9 +83,9 @@
                   </Tooltip>
                 </template>
                 <template #suffix>
-                  <FeatherIcon
-                    class="h-3.5 cursor-pointer group-hover:flex hidden"
-                    name="x"
+                  <span
+                    class="lucide-x h-3.5 cursor-pointer group-hover:flex hidden"
+                    aria-hidden="true"
                     @click.stop="removeQuickFilter(filter)"
                   />
                 </template>
@@ -95,28 +95,28 @@
         </Draggable>
       </FadedScrollableDiv>
       <div>
-        <Autocomplete
-          value=""
+        <Combobox
+          :model-value="null"
           :options="quickFilterOptions"
-          @change="(e) => addQuickFilter(e)"
+          @update:selected-option="(e) => addQuickFilter(e)"
         >
-          <template #target="{ togglePopover }">
+          <template #trigger="{ open, setOpen }">
             <Button
               class="whitespace-nowrap mr-2"
               variant="ghost"
-              :label="__('Add filter')"
+              :label="__('Add Filter')"
               iconLeft="plus"
-              @click="togglePopover()"
+              @click="setOpen(!open)"
             />
           </template>
-          <template #item-label="{ option }">
-            <Tooltip :text="option.value" :hover-delay="1">
+          <template #item-label="{ item }">
+            <Tooltip :text="item.value" :hover-delay="1">
               <div class="flex-1 truncate text-ink-gray-7">
-                {{ option.label }}
+                {{ item.label }}
               </div>
             </Tooltip>
           </template>
-        </Autocomplete>
+        </Combobox>
       </div>
     </div>
     <div class="-ml-2 h-[70%] border-l" />
@@ -126,7 +126,7 @@
         :loading="updateQuickFilters.loading"
         @click="saveQuickFilters"
       />
-      <Button icon="x" @click="customizeQuickFilter = false" />
+      <Button icon="lucide-x" @click="customizeQuickFilter = false" />
     </div>
   </div>
   <div v-else class="flex items-center justify-between gap-2 px-5 py-4">
@@ -152,12 +152,12 @@
         class="flex items-center gap-2 border-r pr-2"
       >
         <Button :label="__('Cancel')" @click="cancelChanges" />
-        <Button :label="__('Save changes')" @click="saveView" />
+        <Button :label="__('Save Changes')" @click="saveView" />
       </div>
       <div class="flex items-center gap-2">
         <Button
           :tooltip="__('Refresh')"
-          :icon="RefreshIcon"
+          icon="lucide-refresh-ccw"
           :loading="isLoading"
           @click="reload()"
         />
@@ -220,7 +220,7 @@
                     route.params.viewType !== 'kanban',
                 },
                 {
-                  label: __('Customize quick filters'),
+                  label: __('Customize Quick Filters'),
                   icon: () => h(QuickFilterIcon, { class: 'h-4 w-4' }),
                   onClick: () => showCustomizeQuickFilter(),
                   condition: () => isManager(),
@@ -230,7 +230,10 @@
           ]"
         >
           <template #default>
-            <Button :tooltip="__('More options')" icon="more-horizontal" />
+            <Button
+              :tooltip="__('More Options')"
+              icon="lucide-more-horizontal"
+            />
           </template>
         </Dropdown>
       </div>
@@ -258,22 +261,21 @@
     }"
   />
   <Dialog
-    v-model="showExportDialog"
-    :options="{
-      title: __('Export'),
-      actions: [
-        {
-          label: __('Download'),
-          variant: 'solid',
-          onClick: () => exportRows(),
-        },
-      ],
-    }"
+    v-model:open="showExportDialog"
+    :title="__('Export')"
+    :actions="[
+      {
+        label: __('Download'),
+        variant: 'solid',
+        onClick: () => exportRows(),
+      },
+    ]"
   >
-    <template #body-content>
+    <template #default>
       <FormControl
+        v-model="export_type"
         variant="outline"
-        :label="__('Export type')"
+        :label="__('Export Type')"
         type="select"
         :options="[
           {
@@ -285,25 +287,24 @@
             value: 'CSV',
           },
         ]"
-        v-model="export_type"
         :placeholder="__('Excel')"
       />
       <div class="mt-3">
         <FormControl
+          v-model="export_all"
           type="checkbox"
           :label="__('Export all {0} record(s)', [list.data.total_count])"
-          v-model="export_all"
         />
       </div>
     </template>
   </Dialog>
 </template>
 <script setup>
+import Icon from '@/components/Icon.vue'
 import ListIcon from '@/components/Icons/ListIcon.vue'
 import KanbanIcon from '@/components/Icons/KanbanIcon.vue'
 import GroupByIcon from '@/components/Icons/GroupByIcon.vue'
 import QuickFilterField from '@/components/QuickFilterField.vue'
-import RefreshIcon from '@/components/Icons/RefreshIcon.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
 import DuplicateIcon from '@/components/Icons/DuplicateIcon.vue'
 import CheckIcon from '@/components/Icons/CheckIcon.vue'
@@ -312,7 +313,6 @@ import UnpinIcon from '@/components/Icons/UnpinIcon.vue'
 import ExportIcon from '@/components/Icons/ExportIcon.vue'
 import QuickFilterIcon from '@/components/Icons/QuickFilterIcon.vue'
 import ViewModal from '@/components/Modals/ViewModal.vue'
-import Autocomplete from '@/components/frappe-ui/Autocomplete.vue'
 import SortBy from '@/components/SortBy.vue'
 import Filter from '@/components/Filter.vue'
 import GroupBy from '@/components/GroupBy.vue'
@@ -326,6 +326,7 @@ import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
 import { isEmoji } from '@/utils'
 import {
+  Combobox,
   Tooltip,
   createResource,
   Dropdown,
@@ -334,30 +335,23 @@ import {
   FeatherIcon,
   usePageMeta,
 } from 'frappe-ui'
-import { computed, ref, onMounted, watch, h, markRaw } from 'vue'
+import { computed, ref, watch, h, markRaw } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useDebounceFn } from '@vueuse/core'
 import { isMobileView } from '@/composables/settings'
 import Draggable from 'vuedraggable'
 import _ from 'lodash'
 import ImportIcon from '~icons/lucide/import'
 
 const props = defineProps({
-  doctype: {
-    type: String,
-    required: true,
-  },
-  filters: {
-    type: Object,
-    default: {},
-  },
+  doctype: { type: String, required: true },
+  filters: { type: Object, default: () => ({}) },
   options: {
     type: Object,
-    default: {
+    default: () => ({
       hideColumnsButton: false,
       defaultViewName: '',
       allowedViews: ['list'],
-    },
+    }),
   },
 })
 
@@ -366,10 +360,10 @@ const { $dialog } = globalStore()
 const { reload: reloadView, getDefaultView, getView } = viewsStore()
 const { isManager } = usersStore()
 
-const list = defineModel()
-const loadMore = defineModel('loadMore')
-const resizeColumn = defineModel('resizeColumn')
-const updatedPageCount = defineModel('updatedPageCount')
+const list = defineModel({ type: Object, default: () => ({}) })
+const loadMore = defineModel('loadMore', { type: Boolean })
+const resizeColumn = defineModel('resizeColumn', { type: Boolean })
+const updatedPageCount = defineModel('updatedPageCount', { type: Boolean })
 
 const route = useRoute()
 const router = useRouter()
@@ -389,7 +383,7 @@ function getViewType() {
     },
     group_by: {
       name: 'group_by',
-      label: __('Group by'),
+      label: __('Group By'),
       icon: markRaw(GroupByIcon),
     },
     kanban: {
@@ -521,9 +515,11 @@ list.value = createResource({
   url: 'crm.api.doc.get_data',
   params: getParams(),
   cache: [props.doctype, route.query.view, route.params.viewType],
+  auto: true,
   onSuccess(data) {
     let cv = getView(route.query.view, route.params.viewType, props.doctype)
     let params = list.value.params ? list.value.params : getParams()
+    list.value.params = params
     defaultParams.value = {
       doctype: props.doctype,
       filters: params.filters,
@@ -546,7 +542,8 @@ list.value = createResource({
   },
 })
 
-onMounted(() => useDebounceFn(reload, 100)())
+// createResource leaves `params` null until a fetch passes them explicitly
+list.value.params = getParams()
 
 const isLoading = computed(() => list.value?.loading)
 
@@ -603,7 +600,7 @@ if (allowedViews.includes('list')) {
     icon: markRaw(ListIcon),
     onClick() {
       viewUpdated.value = false
-      router.push({ name: route.name })
+      router.push({ name: route.name, params: { viewType: 'list' } })
     },
   })
 }
@@ -621,7 +618,7 @@ if (allowedViews.includes('kanban')) {
 if (allowedViews.includes('group_by')) {
   standardViews.push({
     name: 'group_by',
-    label: __(props.options?.defaultViewName) || __('Group by'),
+    label: __(props.options?.defaultViewName) || __('Group By'),
     icon: markRaw(GroupByIcon),
     onClick() {
       viewUpdated.value = false
@@ -637,6 +634,11 @@ function getIcon(icon, type) {
     return markRaw(GroupByIcon)
   } else if (!icon && type === 'kanban') {
     return markRaw(KanbanIcon)
+  } else if (icon && typeof icon === 'string') {
+    // a lucide icon name (from the IconPicker) — render it through Icon so it
+    // resolves from the injected lucide sprite. The Dropdown renders a bare
+    // string via FeatherIcon, which lacks the newer lucide names and shows blank.
+    return () => h(Icon, { icon, class: 'h-4 w-4' })
   }
   return icon || markRaw(ListIcon)
 }
@@ -644,18 +646,21 @@ function getIcon(icon, type) {
 const viewsDropdownOptions = computed(() => {
   let _views = [
     {
-      group: __('Standard views'),
+      group: __('Standard Views'),
       hideLabel: true,
-      items: standardViews,
+      items: standardViews.map((item) => ({
+        ...item,
+        selected: item.name === currentView.value.name,
+      })),
     },
   ]
 
   if (list.value?.data?.views) {
     list.value.data.views.forEach((view) => {
-      view.name = view.name
       view.label = __(view.label)
       view.type = view.type || 'list'
       view.icon = getIcon(view.icon, view.type)
+      view.selected = view.name === currentView.value.name
       view.filters =
         typeof view.filters == 'string'
           ? JSON.parse(view.filters)
@@ -675,21 +680,24 @@ const viewsDropdownOptions = computed(() => {
     )
     let pinnedViews = list.value.data.views.filter((v) => v.pinned)
 
-    savedViews.length &&
+    if (savedViews.length) {
       _views.push({
-        group: __('Saved views'),
+        group: __('Saved Views'),
         items: savedViews,
       })
-    publicViews.length &&
+    }
+    if (publicViews.length) {
       _views.push({
-        group: __('Public views'),
+        group: __('Public Views'),
         items: publicViews,
       })
-    pinnedViews.length &&
+    }
+    if (pinnedViews.length) {
       _views.push({
-        group: __('Pinned views'),
+        group: __('Pinned Views'),
         items: pinnedViews,
       })
+    }
   }
 
   _views.push({
@@ -697,7 +705,7 @@ const viewsDropdownOptions = computed(() => {
     hideLabel: true,
     items: [
       {
-        label: __('Create view'),
+        label: __('Create View'),
         icon: 'plus',
         onClick: () => createView(),
       },
@@ -766,20 +774,8 @@ const quickFilterOptions = computed(() => {
   if (!fields) return []
 
   let existingQuickFilters = newQuickFilters.value.map((f) => f.fieldname)
-  let restrictedFieldtypes = [
-    'Tab Break',
-    'Section Break',
-    'Column Break',
-    'Table',
-    'Table MultiSelect',
-    'HTML',
-    'Button',
-    'Image',
-    'Fold',
-    'Heading',
-  ]
   let options = fields
-    .filter((f) => f.label && !restrictedFieldtypes.includes(f.fieldtype))
+    .filter((f) => f.label)
     .filter((f) => !existingQuickFilters.includes(f.fieldname))
     .map((field) => ({
       label: field.label,
@@ -940,17 +936,35 @@ function updateColumns(obj) {
 
   if (!route.query.view) {
     createOrUpdateStandardView()
+  } else if (!view.value.public) {
+    persistCustomView()
   }
 }
 
-async function updateKanbanSettings(data) {
+function persistCustomView() {
+  view.value.doctype = props.doctype
+  call('crm.fcrm.doctype.crm_view_settings.crm_view_settings.update', {
+    view: view.value,
+  }).then(() => {
+    reloadView()
+    viewUpdated.value = false
+  })
+}
+
+function updateKanbanSettings(data) {
   if (data.item && data.to) {
-    await call('frappe.client.set_value', {
+    call('frappe.client.set_value', {
       doctype: props.doctype,
       name: data.item,
       fieldname: view.value.column_field,
       value: data.to,
     })
+    return
+  }
+
+  if (data.fetchNewColumns) {
+    fetchAndUpdateKanbanColumns(view.value)
+    return
   }
 
   viewUpdated.value = true
@@ -1086,9 +1100,9 @@ const viewActions = (view, close) => {
     },
   ]
 
-  if (!isDefaultView(_view, isStandard)) {
+  if (isStandard && !isDefaultView(_view)) {
     actions[0].items.unshift({
-      label: __('Set as default'),
+      label: __('Set As Default'),
       icon: () => h(CheckIcon, { class: 'h-4 w-4' }),
       onClick: () => setAsDefault(_view),
     })
@@ -1103,7 +1117,7 @@ const viewActions = (view, close) => {
 
     if (!_view.public) {
       actions[0].items.push({
-        label: _view.pinned ? __('Unpin view') : __('Pin view'),
+        label: _view.pinned ? __('Unpin View') : __('Pin View'),
         icon: () => h(_view.pinned ? UnpinIcon : PinIcon, { class: 'h-4 w-4' }),
         onClick: () => pinView(_view),
       })
@@ -1111,7 +1125,7 @@ const viewActions = (view, close) => {
 
     if (isManager()) {
       actions[0].items.push({
-        label: _view.public ? __('Make private') : __('Make public'),
+        label: _view.public ? __('Make Private') : __('Make Public'),
         icon: () =>
           h(FeatherIcon, {
             name: _view.public ? 'lock' : 'unlock',
@@ -1122,7 +1136,7 @@ const viewActions = (view, close) => {
     }
 
     actions.push({
-      group: __('Delete view'),
+      group: __('Delete View'),
       hideLabel: true,
       items: [
         {
@@ -1130,7 +1144,7 @@ const viewActions = (view, close) => {
           icon: 'trash-2',
           onClick: () =>
             $dialog({
-              title: __('Delete view'),
+              title: __('Delete View'),
               message: __('Are you sure you want to delete "{0}" view?', [
                 _view.label,
               ]),
@@ -1151,10 +1165,10 @@ const viewActions = (view, close) => {
   return actions
 }
 
-function isDefaultView(v, isStandard) {
+function isDefaultView(v) {
   let defaultView = getDefaultView()
 
-  if (!defaultView || (isStandard && !v.name)) return false
+  if (!defaultView || !v.name) return false
 
   return defaultView.name == v.name
 }
@@ -1222,11 +1236,24 @@ function deleteView(v, close) {
   call('crm.fcrm.doctype.crm_view_settings.crm_view_settings.delete', {
     name: v.name,
   }).then(() => {
-    router.push({ name: route.name })
+    router.push({ name: route.name, params: { viewType: 'list' } })
     reloadView()
     list.value.reload()
   })
   close()
+}
+
+function fetchAndUpdateKanbanColumns(v) {
+  call(
+    'crm.fcrm.doctype.crm_view_settings.crm_view_settings.fetch_and_update_kanban_columns',
+    {
+      name: v.name,
+    },
+  ).then((columns) => {
+    list.value.params.kanban_columns = columns
+    view.value.kanban_columns = columns
+    list.value.reload()
+  })
 }
 
 function cancelChanges() {
@@ -1258,7 +1285,7 @@ function saveView() {
 }
 
 function applyFilter({ event, idx, column, item, firstColumn }) {
-  let restrictedFieldtypes = ['Duration', 'Datetime', 'Time']
+  let restrictedFieldtypes = ['Datetime', 'Time']
   if (restrictedFieldtypes.includes(column.type) || idx === 0) return
   if (idx === 1 && firstColumn.key == '_liked_by') return
 
@@ -1267,9 +1294,9 @@ function applyFilter({ event, idx, column, item, firstColumn }) {
 
   let filters = { ...list.value.params.filters }
 
-  let value = item.name || item.label || item
+  let value = item.name ?? item.label ?? item
 
-  if (value) {
+  if (value !== null && value !== undefined && value !== '') {
     filters[column.key] = value
   } else {
     delete filters[column.key]
@@ -1313,6 +1340,7 @@ defineExpose({
   applyLikeFilter,
   likeDoc,
   updateKanbanSettings,
+  fetchAndUpdateKanbanColumns,
   loadMoreKanban,
   viewActions,
   viewsDropdownOptions,

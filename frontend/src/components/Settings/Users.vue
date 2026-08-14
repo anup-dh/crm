@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex justify-between px-2 pt-2">
       <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-xl font-semibold leading-none h-5">
+        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
           {{ __('Users') }}
         </h2>
         <p class="text-p-base text-ink-gray-6">
@@ -18,11 +18,11 @@
         <Dropdown
           :options="[
             {
-              label: __('Add existing user'),
+              label: __('Add Existing User'),
               onClick: () => (showAddExistingModal = true),
             },
             {
-              label: __('Invite new user'),
+              label: __('Invite New User'),
               onClick: () => (activeSettingsPage = 'Invite User'),
             },
           ]"
@@ -49,43 +49,46 @@
     <!-- Empty State -->
     <EmptyState
       v-if="!users.loading && users.data?.crmUsers?.length == 1"
-      name="users"
+      name="Users"
       :description="__('Add one to get started.')"
       icon="user"
     />
 
     <!-- Users List -->
     <div
-      class="flex flex-col overflow-hidden"
       v-if="!users.loading && users.data?.crmUsers?.length > 1"
+      class="flex flex-col overflow-hidden"
     >
       <div
         v-if="users.data?.crmUsers?.length > 10"
-        class="flex items-center justify-between mb-4 px-2 pt-0.5"
+        class="flex items-center gap-2 mb-4 px-2 pt-0.5"
       >
         <TextInput
           ref="searchRef"
           v-model="search"
-          :placeholder="__('Search user')"
-          class="w-1/3"
+          :placeholder="__('Search User')"
+          class="w-full"
           :debounce="300"
         >
           <template #prefix>
-            <FeatherIcon name="search" class="h-4 w-4 text-ink-gray-6" />
+            <span
+              class="lucide-search h-4 w-4 text-ink-gray-6"
+              aria-hidden="true"
+            />
           </template>
         </TextInput>
-        <FormControl
-          type="select"
+        <Select
           v-model="currentRole"
+          class="shrink-0"
           :options="[
             { label: __('All'), value: 'All' },
             { label: __('Admin'), value: 'System Manager' },
             { label: __('Manager'), value: 'Sales Manager' },
-            { label: __('Sales user'), value: 'Sales User' },
+            { label: __('Sales User'), value: 'Sales User' },
           ]"
         />
       </div>
-      <ul class="divide-y divide-outline-gray-modals overflow-y-auto px-2">
+      <ul class="divide-y divide-outline-elevation-2 overflow-y-auto px-2">
         <template v-for="user in usersList" :key="user.name">
           <li class="flex items-center justify-between py-2">
             <div class="flex items-center">
@@ -119,7 +122,7 @@
                 v-if="isManager() && user.role == 'System Manager'"
                 :text="__('Cannot change role of user with Admin access')"
               >
-                <Button :label="__('Admin')" icon-left="shield" />
+                <Button :label="__('Admin')" icon-left="lucide-shield" />
               </Tooltip>
               <Dropdown
                 v-else
@@ -146,10 +149,10 @@
         >
           <Button
             class="mt-3.5 p-2"
-            @click="() => users.next()"
             :loading="users.loading"
-            :label="__('Load more')"
-            icon-left="refresh-cw"
+            :label="__('Load More')"
+            icon-left="lucide-refresh-cw"
+            @click="() => users.next()"
           />
         </div>
       </ul>
@@ -173,10 +176,11 @@ import {
   TextInput,
   toast,
   call,
-  FeatherIcon,
   Tooltip,
+  Select,
 } from 'frappe-ui'
 import { ref, computed, onMounted } from 'vue'
+import { ConfirmDelete } from '../../utils'
 
 const { users, isAdmin, isManager } = usersStore()
 
@@ -188,7 +192,7 @@ const currentRole = ref('All')
 const roleMap = {
   'System Manager': __('Admin'),
   'Sales Manager': __('Manager'),
-  'Sales User': __('Sales user'),
+  'Sales User': __('Sales User'),
 }
 
 const usersList = computed(() => {
@@ -211,23 +215,11 @@ const confirmRemove = ref(false)
 
 function getMoreOptions(user) {
   return [
-    {
+    ...ConfirmDelete({
+      onConfirmDelete: () => removeUser(user),
+      isConfirmingDelete: confirmRemove,
       label: __('Remove'),
-      icon: 'trash-2',
-      onClick: (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        confirmRemove.value = true
-      },
-      condition: () => !confirmRemove.value,
-    },
-    {
-      label: __('Confirm remove'),
-      icon: 'trash-2',
-      theme: 'red',
-      onClick: () => removeUser(user, true),
-      condition: () => confirmRemove.value,
-    },
+    }),
   ]
 }
 
@@ -253,13 +245,13 @@ function getDropdownOptions(user) {
           selected: user.role === 'Sales Manager',
         }),
       onClick: () => updateRole(user, 'Sales Manager'),
-      condition: () => isManager(),
+      condition: () => isAdmin(),
     },
     {
-      label: __('Sales user'),
+      label: __('Sales User'),
       component: () =>
         DropdownOption({
-          option: __('Sales user'),
+          option: __('Sales User'),
           icon: 'user-check',
           selected: user.role === 'Sales User',
         }),

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <div
     v-if="reply?.message"
@@ -8,35 +9,38 @@
       :class="reply.type == 'Incoming' ? 'border-green-500' : 'border-blue-400'"
     >
       <div
-        class="mb-1 text-sm font-bold"
+        class="mb-1 text-sm-bold"
         :class="
-          reply.type == 'Incoming' ? 'text-ink-green-2' : 'text-ink-blue-link'
+          reply.type == 'Incoming' ? 'text-ink-green-5' : 'text-ink-blue-link'
         "
       >
         {{ reply.from_name || __('You') }}
       </div>
-      <div class="max-h-12 overflow-hidden" v-html="reply.message" />
+      <div
+        class="max-h-12 overflow-hidden"
+        v-html="sanitizeHTML(reply.message)"
+      />
     </div>
 
-    <Button variant="ghost" icon="x" @click="reply = {}" />
+    <Button variant="ghost" icon="lucide-x" @click="reply = {}" />
   </div>
   <div class="flex items-end gap-2 px-3 py-2.5 sm:px-10" v-bind="$attrs">
     <div class="flex h-8 items-center gap-2">
       <FileUploader @success="(file) => uploadFile(file)">
-        <template v-slot="{ openFileSelector }">
+        <template #default="{ openFileSelector }">
           <div class="flex items-center space-x-2">
             <Dropdown :options="uploadOptions(openFileSelector)">
-              <FeatherIcon
-                name="plus"
-                class="size-4.5 cursor-pointer text-ink-gray-5"
+              <span
+                class="lucide-plus size-4.5 cursor-pointer text-ink-gray-5"
+                aria-hidden="true"
               />
             </Dropdown>
           </div>
         </template>
       </FileUploader>
       <IconPicker
-        v-model="emoji"
         v-slot="{ togglePopover }"
+        v-model="emoji"
         @update:modelValue="
           () => {
             content += emoji
@@ -46,17 +50,17 @@
         "
       >
         <SmileIcon
+          class="flex size-4.5 cursor-pointer rounded-sm text-2xl leading-none text-ink-gray-4"
           @click="togglePopover"
-          class="flex size-4.5 cursor-pointer rounded-sm text-xl leading-none text-ink-gray-4"
         />
       </IconPicker>
     </div>
     <Textarea
       ref="textareaRef"
+      v-model="content"
       type="textarea"
       class="min-h-8 w-full"
       :rows="rows"
-      v-model="content"
       :placeholder="placeholder"
       @focus="rows = 6"
       @blur="rows = 1"
@@ -68,6 +72,7 @@
 <script setup>
 import IconPicker from '@/components/IconPicker.vue'
 import SmileIcon from '@/components/Icons/SmileIcon.vue'
+import { sanitizeHTML } from '@/utils'
 import { useTelemetry } from 'frappe-ui/frappe'
 import {
   createResource,
@@ -79,12 +84,12 @@ import {
 import { ref, nextTick, watch } from 'vue'
 
 const props = defineProps({
-  doctype: String,
+  doctype: { type: String, default: '' },
 })
 
-const doc = defineModel()
-const whatsapp = defineModel('whatsapp')
-const reply = defineModel('reply')
+const doc = defineModel({ type: Object, default: () => ({}) })
+const whatsapp = defineModel('whatsapp', { type: Object, default: () => ({}) })
+const reply = defineModel('reply', { type: Object, default: () => ({}) })
 
 const { capture } = useTelemetry()
 
@@ -144,7 +149,7 @@ async function sendWhatsAppMessage() {
 function uploadOptions(openFileSelector) {
   return [
     {
-      label: __('Upload document'),
+      label: __('Upload Document'),
       icon: 'file',
       onClick: () => {
         fileType.value = 'document'
@@ -152,7 +157,7 @@ function uploadOptions(openFileSelector) {
       },
     },
     {
-      label: __('Upload image'),
+      label: __('Upload Image'),
       icon: 'image',
       onClick: () => {
         fileType.value = 'image'
@@ -160,7 +165,7 @@ function uploadOptions(openFileSelector) {
       },
     },
     {
-      label: __('Upload video'),
+      label: __('Upload Video'),
       icon: 'video',
       onClick: () => {
         fileType.value = 'video'
